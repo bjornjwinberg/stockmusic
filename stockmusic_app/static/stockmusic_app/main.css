@@ -1,0 +1,18 @@
+body {
+    background-color: lightblue;
+    font-family: 'Rye', cursive;
+}
+
+div.bar {
+display: inline-block;
+width: 20px;
+height: 75px; /* Gets overriden by D3-assigned height in html */
+margin-right: 2px;
+background-color: teal;
+}
+
+.pumpkin {
+    fill: yellow;
+    stroke: orange;
+    stroke-width: 5;
+ }
