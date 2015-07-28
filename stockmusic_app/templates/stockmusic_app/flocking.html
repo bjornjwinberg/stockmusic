@@ -8,7 +8,7 @@
         {% load staticfiles %}
         <script src="{% static 'stockmusic_app/dist/flocking-all.js' %}"></script>
         <script src="{% static 'stockmusic_app/myStuff.js' %}"></script>
-        <script src="{% static 'stockmusic_app/script.js' %}"></script>
+        <script src="{% static 'stockmusic_app/fuckaround_script.js' %}"></script>
 
     </head>
 
@@ -17,7 +17,18 @@
         <button type="button" id="start">make noise</button>
         <button type="button" id="pitch_up">frequency up</button>
         <button type="button" id="pitch_down">frequency down</button>
-        <button type="button" id="shut_up">shut up</button>
+        <button type="button" id="shut_up">shuttt up</button>
+
+        <form id="stock_form" method="GET" action="/stockmusic_app/prices">
+        Company:<br>
+        <input type="text" name="company">
+        <br>
+        Start:<br>
+        <input type="date" name="start_date">
+        End:<br>
+        <input type="date" name="end_date">
+        <input type="submit" value="submit">
+        </form>
 
     </body>
 </html>
