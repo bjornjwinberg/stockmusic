@@ -1,12 +1,12 @@
+"use strict"
 
 var major = [261.626, 293.665, 329.628, 349.228, 391.995, 440.000, 493.883];
 var scaleCounter = 0;
 var mySynth = myStuff.create();
+var upDays = [];
+var downDays = [];
 
-var increases = [];
-var decreases = [];
-
-function foo(dummyData, tempo) {
+function dataPlayer(data, tempo) {
     var dataCounter = 0;
     var octave = 1
     var id = setInterval(function() {
@@ -14,22 +14,23 @@ function foo(dummyData, tempo) {
 
         var currentValue = [];
         var nextValue = [];
-        currentValue.push(dummyData[dataCounter]);
-        nextValue.push(dummyData[dataCounter+1]);
+        currentValue.push(data[dataCounter]);
+        nextValue.push(data[dataCounter+1]);
 
         if (isNaN(nextValue[0])) {
-            $("body").trigger("dun",[id]);
-            console.log("idddd", id)
+            $("body").trigger("finished", [id]);
+            console.log("id is:", id)
+
         } else {
 
             if (currentValue[0] < nextValue[0]) {
                 var positiveChange = (nextValue[0] - currentValue[0]) / currentValue[0] * 100;
-                increases.push(positiveChange);
+                upDays.push(positiveChange);
                 console.log(" . . . current value:", currentValue, " . . . next value:", nextValue, " . . . percent increase:", positiveChange);
 
                 if (scaleCounter == 6) {
                     scaleCounter = -1;
-                    if (octave == 0.5){
+                    if (octave == 0.5) {
                         octave = 1
                     } else {
                         octave += 1
@@ -44,8 +45,9 @@ function foo(dummyData, tempo) {
                 console.log("freq after up button:", freq, "scaleCounter after up button:", scaleCounter, "dataCounter after up:", dataCounter)
 
             } else {
+
                 var negativeChange = (currentValue[0] - nextValue[0]) / currentValue[0] * 100;
-                decreases.push(negativeChange);
+                downDays.push(negativeChange);
                 console.log(" . . . current value:", currentValue, " . . . next value:", nextValue, " . . . percent decrease:", negativeChange);
 
                 if (scaleCounter == 0) {
@@ -68,28 +70,77 @@ function foo(dummyData, tempo) {
     }, tempo);
 };
 
-$(document).ready(function() {
-    var dummyData = [100, 95, 90, 80, 200, 50, 75, 150, 75, 7.5, 15, 30, 60, 120, 150, 160, 150, 140, 80, 70, 60, 50, 49, 48, 44, 43, 41, 35, 33, 31, 14];
+function grapher(data) {
 
-    $("body").on("dun", function(event, killInter){
-        window.clearInterval(killInter);
+    var svg = d3.select("#lineBackground")
+      .append("svg")
+      .attr("width", 1200)
+      .attr("height", 1200)
+      .attr("id", "visualization");
+
+    var max = Math.max.apply(null, data);
+    var height = max + 10;
+    var width = data.length;
+    var x = d3.scale.linear().domain([0, width]).range([0, 1100]);
+    var y = d3.scale.linear().domain([height, 0]).range([0, 1100]);
+    var line = d3.svg.line()
+      .interpolate("linear")
+      .x(function(d,i) {return x(i);})
+      .y(function(d) {return y(d);});
+
+    var path = svg.append("path")
+      .attr("d", line(data))
+      .attr("stroke", "steelblue")
+      .attr("stroke-width", "5")
+      .attr("fill", "teal");
+
+    var totalLength = path.node().getTotalLength();
+
+    path
+      .attr("stroke-dasharray", totalLength + " " + totalLength)
+      .attr("stroke-dashoffset", totalLength)
+      .transition()
+        .duration(5000)
+        .ease("linear")
+        .attr("stroke-dashoffset", 0);
+
+    svg.on("click", function() {
+      path
+        .transition()
+        .duration(2000)
+        .ease("linear")
+        .attr("stroke-dashoffset", totalLength);
+    })
+};
+
+$(document).ready(function() {
+
+    var stockQuotes = []
+
+    $("body").on("finished", function(event, killInterval){
+        window.clearInterval(killInterval);
         myStuff.stop()
-        console.log("killed yo")
-        console.log(killInter)
+        console.log("interval killed, yo")
+        console.log(killInterval)
     });
 
     $("#stock_form").on("submit", function() {
         event.preventDefault();
-        var datuh = $(this).serialize();
-        console.log("datah:", datuh)
-        $.get($(this).attr("action"), datuh, function(data) {
-            console.log(data)
-            foo(data["quote"], 100);
-        })
-    });
 
+        var speed = $(this).children('input[name="tempo"]').val();
+        console.log("speed", speed)
+
+        var formData = $(this).serialize();
+        console.log("form data:", formData);
+
+        $.get($(this).attr("action"), formData, function(data) {
+            dataPlayer(data["quote"], speed);
+            grapher(data["quote"]);
+        });
+        $(this).children("input[name]").val("");
+    });
     $("#start").on("click", function() {
-        foo(dummyData, 100);
+        myStuff.play();
     });
     $("#pitch_up").on("click", function() {
         if (scaleCounter == 6) {
@@ -101,7 +152,7 @@ $(document).ready(function() {
         var freq = mySynth.get("carrier.freq");
         console.log("freq after up button________", freq, "scaleCounter after up button________", scaleCounter)
     });
-    $("#pitch_down").on("click", function() { // make these functions that take scalecounter as an arg. every time set interval runs, de/increment stuff
+    $("#pitch_down").on("click", function() {
         if (scaleCounter == 0) {
             scaleCounter = 7
         };
@@ -116,4 +167,4 @@ $(document).ready(function() {
     });
 });
 
-
+// http://bl.ocks.org/duopixel/4063326 (chart you modified)

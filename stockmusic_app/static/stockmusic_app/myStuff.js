@@ -29,12 +29,12 @@
         // var synth = flock.synth({
         //     synthDef: {
         //         ugen: "flock.ugen.filter.moog",
-        //         cutoff: {
-        //             ugen: "flock.ugen.sinOsc",
-        //             freq: 1/4,
-        //             mul: 5000,
-        //             add: 7000
-        //         },
+                // cutoff: {
+                //     ugen: "flock.ugen.sinOsc",
+                //     freq: 1/4,
+                //     mul: 5000,
+                //     add: 7000
+                // },
         //         resonance: {
         //             ugen: "flock.ugen.sinOsc",
         //             freq: 1/2,
