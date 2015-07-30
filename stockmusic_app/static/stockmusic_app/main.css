@@ -1,7 +1,10 @@
-
-
 body {
+    font-family: 'Lato', sans-serif;
     height: 100em;
     width: 100em;
     background: linear-gradient(0deg, white, lightblue);
+}
+
+#stocksong {
+    color: steelblue;
 }

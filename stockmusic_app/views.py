@@ -5,6 +5,39 @@ from django.shortcuts import render
 from django.views.generic import View
 
 
+def make_notes(quotes):
+    major = [261.626, 293.665, 329.628, 349.228, 391.995, 440.000, 493.883]
+    frequency_sequence = []
+    octave = 1
+    scaleCounter = 0
+
+    for index in range(len(quotes)):
+        if index + 1 == len(quotes):
+            continue
+        else:
+            if quotes[index] < quotes[index+1]:
+                if scaleCounter == 6:
+                    scaleCounter = -1
+                    if octave == 0.5:
+                        octave = 1
+                    else:
+                        octave += 1
+                scaleCounter += 1
+                scaleCounter = abs(scaleCounter)
+                frequency_sequence.append(octave * major[scaleCounter % len(major)])
+            else:
+                if scaleCounter == 0:
+                    scaleCounter = 7
+                    if octave > 1:
+                        octave -= 1
+                    else:
+                        octave = 0.5
+                scaleCounter -= 1
+                scaleCounter = abs(scaleCounter)
+                frequency_sequence.append(octave * major[scaleCounter % len(major)])
+    return frequency_sequence
+
+
 class IndexView(View):
 
     def get(self, request):
@@ -27,4 +60,4 @@ class YahooView(View):
         q = json.loads(sliced)
         quote = q['query']['results']['quote']
         dumberer = [float(quote[idx]['Adj_Close']) for idx in range(len(quote)-1, -1, -1)]
-        return JsonResponse({"quote": dumberer})
+        return JsonResponse({"quote": dumberer, "frequency_sequence": make_notes(dumberer)})
