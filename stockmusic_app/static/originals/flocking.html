@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+
+        <title>$tock$ong</title>
+
+        {% load staticfiles %}
+        <link rel="shortcut icon" type="image/png" href="{% static 'stockmusic_app/blotch.png' %}"/>
+        <link href='http://fonts.googleapis.com/css?family=Lato' rel='stylesheet' type='text/css'>
+        <link rel="stylesheet" href="{% static 'stockmusic_app/main.css' %}">
+        <script src="http://d3js.org/d3.v3.min.js"></script>
+        <script src="{% static 'stockmusic_app/flocking-all.min.js' %}"></script>
+        <script src="{% static 'stockmusic_app/myStuff.js' %}"></script>
+        <script src="{% static 'stockmusic_app/domScript.js' %}"></script>
+
+    </head>
+
+    <body>
+
+        <h3 id="stocksong">$tock$ong</h3>
+
+        <form id="stock_form" method="GET" action="/stockmusic_app/prices">
+
+            Ticker:
+            <input type="text" name="company" required>
+
+            Start:
+            <input type="date" name="start_date" required>
+
+            End:
+            <input type="date" name="end_date" required>
+
+            Fast<input type ="range" name="tempo" min ="50" max="500" step ="50" value ="100"/>Slow
+
+            <input type="submit" value="Submit">
+
+        </form>
+
+        <button type="button" id="start">start synth</button>
+        <button type="button" id="pitch_up">frequency up</button>
+        <button type="button" id="pitch_down">frequency down</button>
+        <button type="button" id="shut_up">stop synth</button>
+
+        <div id="lineBackground"></div>​
+
+    </body>
+</html>
