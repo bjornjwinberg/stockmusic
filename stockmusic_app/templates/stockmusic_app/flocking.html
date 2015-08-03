@@ -8,9 +8,9 @@
         <link rel="shortcut icon" type="image/png" href="{% static 'stockmusic_app/blotch.png' %}"/>
         <link href='http://fonts.googleapis.com/css?family=Lato' rel='stylesheet' type='text/css'>
         <link rel="stylesheet" href="{% static 'stockmusic_app/main.css' %}">
-        <script src="http://d3js.org/d3.v3.min.js"></script>
         <script src="{% static 'stockmusic_app/flocking-all.min.js' %}"></script>
         <script src="{% static 'stockmusic_app/myStuff.js' %}"></script>
+        <script src="{% static 'stockmusic_app/d3.min.js' %}"></script>
         <script src="{% static 'stockmusic_app/domScript.js' %}"></script>
 
     </head>
@@ -21,25 +21,30 @@
 
         <form id="stock_form" method="GET" action="/stockmusic_app/prices">
 
-            Ticker:
-            <input type="text" name="company" required>
+            <input autofocus type="text" name="company" required> Ticker<br/>
 
-            Start:
-            <input type="date" name="start_date" required>
+            <input type="date" name="start_date" required> Start<br/>
 
-            End:
-            <input type="date" name="end_date" required>
+            <select name="duration">
+                <option value="7">1 week</option>
+                <option value="30">1 month</option>
+                <option value="90">3 months</option>
+                <option value="180">6 months</option>
+                <option value="365">1 year</option>
+            </select> Duration<br/>
 
-            Fast<input type ="range" name="tempo" min ="50" max="500" step ="50" value ="100"/>Slow
+            Fast <input type ="range" name="tempo" min ="50" max="500" step ="50" value ="100"/> Slow<br/>
 
             <input type="submit" value="Submit">
 
         </form>
 
-        <button type="button" id="start">start synth</button>
-        <button type="button" id="pitch_up">frequency up</button>
-        <button type="button" id="pitch_down">frequency down</button>
-        <button type="button" id="shut_up">stop synth</button>
+        <div id="synth_buttons">
+            <button type="button" id="start">start synth</button>
+            <button type="button" id="pitch_up">pitch up</button>
+            <button type="button" id="pitch_down">pitch down</button>
+            <button type="button" id="shut_up">stop synth</button>
+        </div>
 
         <div id="lineBackground"></div>​
 

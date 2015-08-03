@@ -7,7 +7,8 @@ var upDays = [];
 var downDays = [];
 
 
-function dataGrapher(data, minness, maxness, longness) {
+function dataGrapher(data, minness, maxness, longness, chartColor) {
+    console.log(chartColor);
     $("#lineBackground").empty();
 
     var svg = d3.select("#lineBackground")
@@ -27,7 +28,7 @@ function dataGrapher(data, minness, maxness, longness) {
       .attr("d", line(data))
       .attr("stroke", "steelblue")
       .attr("stroke-width", "5")
-      .attr("fill", "white");
+      .attr("fill", chartColor);
 
     var totalLength = path.node().getTotalLength();
     path
@@ -57,12 +58,27 @@ $(document).ready(function() {
             var longness = data["quote"].length
 
             var worker = new Worker('/static/stockmusic_app/task.js');
-
+            var currentMood = "normal"
+            var chartColor = "white"
 
             worker.addEventListener('message', function(e) {
                 myStuff.play();
-                mySynth.set("carrier.freq", e.data[0]);
-                dataGrapher(data["quote"].slice(0, e.data[1]+2), minness, maxness, longness);
+                console.log("mooooood",currentMood)
+                if (e.data[0][0] != currentMood) {
+                    if (e.data[0][0] == "happy") {
+                        chartColor = "green"
+                        console.log("should be green", chartColor)
+                    } else if (e.data[0][0] == "sad") {
+                        chartColor = "red"
+                        console.log("should be red", chartColor)
+                    } else {
+                        chartColor = "white"
+                    }
+                    currentMood = e.data[0][0]
+                };
+                mySynth.set("carrier.freq", e.data[0][1]);
+                dataGrapher(data["quote"].slice(0, e.data[1]+2), minness, maxness, longness, chartColor);
+                // chartColor = "white"
                 if(e.data[1]+2 == longness) {
                     setTimeout(function() {
                         myStuff.stop();

@@ -1,8 +1,8 @@
 body {
     font-family: 'Lato', sans-serif;
-    height: 100em;
-    width: 100em;
+    height: 50em;
     background: linear-gradient(0deg, white, lightblue);
+    background-repeat: no-repeat;
 }
 
 #stocksong {
