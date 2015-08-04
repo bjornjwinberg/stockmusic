@@ -87,7 +87,13 @@ class YahooView(View):
         c = str(r.content)
         start = c.find("{")
         sliced = c[start:-3]
-        q = json.loads(sliced)
+
+        try:
+            q = json.loads(sliced)
+        except:
+            return JsonResponse({"error": "Something went horribly, horribly wrong."})
+
         quote = q['query']['results']['quote']
         dumberer = [float(quote[idx]['Adj_Close']) for idx in range(len(quote)-1, -1, -1)]
         return JsonResponse({"quote": dumberer, "frequency_sequence": make_notes(dumberer)})
+
