@@ -41,7 +41,6 @@ function dataGrapher(data, minness, maxness, longness, chartColor) {
         .attr("stroke-dashoffset", 0);
 };
 
-
 $(document).ready(function() {
 
     $("body").on("finished", function(event, killInterval) {
@@ -55,10 +54,6 @@ $(document).ready(function() {
         var formData = $(this).serialize();
 
         $.get($(this).attr("action"), formData, function(data) {
-            if (data["error"]) {
-                $("#lineBackground").append(data["error"]);
-                return
-            };
 
             var prices = data["quote"];
             var notes = data["frequency_sequence"];
@@ -80,8 +75,8 @@ $(document).ready(function() {
             };
             var ctx = document.getElementById("myChart").getContext("2d");
             new Chart(ctx).Line(datuh, {
-                scaleShowGridLines : true,
-                scaleGridLineColor : "black",
+                scaleShowGridLines : false,
+                scaleGridLineColor : "steelblue",
                 scaleGridLineWidth : 1,
                 scaleShowHorizontalLines: true,
                 scaleShowVerticalLines: true,
@@ -105,7 +100,7 @@ $(document).ready(function() {
 
             worker.addEventListener('message', function(e) {
                 myStuff.play();
-                console.log("mooooood",currentMood)
+                console.log("mooooood", currentMood);
                 if (e.data[0][0] != currentMood) {
                     if (e.data[0][0] == "happy") {
                         chartColor = "green"
@@ -117,9 +112,11 @@ $(document).ready(function() {
                     currentMood = e.data[0][0]
                 };
 
-                console.log("datuhh", e.data)
+                console.log("datuhh", e.data);
 
                 mySynth.set("carrier.freq", e.data[0][1]);
+                mySynth2.set("mod.freq", e.data[0][1]*2);
+                // mySynth.set("mod.freq", e.data[0][1]*(3/2));
                 dataGrapher(data["quote"].slice(0, e.data[1]+2), minness, maxness, longness, chartColor);
                 if(e.data[1]+2 == longness) {
                     setTimeout(function() {

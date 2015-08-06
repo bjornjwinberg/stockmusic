@@ -28,7 +28,6 @@ def make_notes(quotes):
         else:
             mood_pitch_price.append("normal")
 
-
         if index + 1 == len(quotes):
             continue
         else:
@@ -71,7 +70,7 @@ class YahooView(View):
 
         request_dict = dict(request.GET)
 
-        fixed_dict = {k:v[0] for k,v in request_dict.items()}
+        fixed_dict = {k: v[0] for k, v in request_dict.items()}
 
         duration = fixed_dict["duration"]
 

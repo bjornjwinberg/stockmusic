@@ -1,10 +1,14 @@
 body {
-    font-family: 'Lato', sans-serif;
-    height: 50em;
+    /*font-family: 'Lato', sans-serif;*/
+    /*height: 50em;*/
     background: linear-gradient(0deg, white, lightblue);
     background-repeat: no-repeat;
 }
 
 #stocksong {
     color: steelblue;
+}
+
+#myChart {
+    color: yellow;
 }
