@@ -3,10 +3,56 @@
 var major = [261.626, 293.665, 329.628, 349.228, 391.995, 440.000, 493.883];
 var scaleCounter = 0;
 var mySynth = myStuff.create();
-var mySynth2 = myStuff.create();
+// var mySynth2 = myStuff2.create();
+// var mySynth3 = myStuff2.create();
 var upDays = [];
 var downDays = [];
 
+function startD3(data, speed) {
+
+    var minness = Math.min.apply(null, data["quote"]);
+    var maxness = Math.max.apply(null, data["quote"]);
+    var longness = data["quote"].length;
+
+    var worker = new Worker('/static/stockmusic_app/task.js');
+    var currentMood = "normal";
+    var chartColor = "white";
+
+    worker.addEventListener('message', function(e) {
+        myStuff.play();
+        console.log("mooooood", currentMood);
+        if (e.data[0].mood != currentMood) {
+            if (e.data[0].mood == "happy") {
+                chartColor = "green"
+            } else if (e.data[0].mood == "sad") {
+                chartColor = "red"
+            } else {
+                chartColor = "white"
+            }
+            currentMood = e.data[0].mood
+        };
+
+        console.log("datuhh", e.data);
+
+        mySynth.set({
+            "left.freq": e.data[0].pitch,
+            "right.freq": e.data[0].harmony
+        });
+        // mySynth.set("right.freq", e.data[0].harmony);
+        // mySynth2.set("carrier.freq", 261.626/2);
+        dataGrapher(data["quote"].slice(0, e.data[1]+2), minness, maxness, longness, chartColor);
+        if(e.data[1]+2 == longness) {
+            setTimeout(function() {
+                myStuff.stop();
+            }, 1000);
+        };
+    }, false);
+    dataGrapher(data["quote"].slice(0, 1), minness, maxness, longness, chartColor);
+    worker.postMessage([data["frequency_sequence"], speed]);
+
+
+
+}
 
 function dataGrapher(data, minness, maxness, longness, chartColor) {
     // console.log(chartColor);
@@ -50,14 +96,22 @@ $(document).ready(function() {
 
     $("#stock_form").on("submit", function() {
         event.preventDefault();
+        $("#fuckup").empty();
         var speed = Number($(this).children('input[name="tempo"]').val());
         var formData = $(this).serialize();
 
         $.get($(this).attr("action"), formData, function(data) {
+            if (data.error) {
 
+                var template = $("#fuckup2").html();
+                var rendered = Mustache.render(template, data);
+                $("#fuckup").html(rendered);
+                $("#fuckup").fadeOut(5000);
+                return
+            };
             var prices = data["quote"];
             var notes = data["frequency_sequence"];
-
+            console.log(data);
             var datuh = {
                 labels: notes,
                 datasets: [
@@ -70,10 +124,24 @@ $(document).ready(function() {
                         pointHighlightFill: "#fff",
                         pointHighlightStroke: "rgba(220,220,220,1)",
                         data: prices
+                    },
+                    {
+                        label: "My Other dataset",
+                        fillColor: "blue",
+                        strokeColor: "rgba(220,220,220,1)",
+                        pointColor: "rgba(220,220,220,1)",
+                        pointStrokeColor: "#fff",
+                        pointHighlightFill: "#fff",
+                        pointHighlightStroke: "rgba(220,220,220,1)",
+                        data: prices*2
                     }
                 ]
             };
             var ctx = document.getElementById("myChart").getContext("2d");
+            Chart.defaults.global.onAnimationComplete = function() {
+                startD3(data, speed);
+            };
+            // console.log(Chart.defaults.global)
             new Chart(ctx).Line(datuh, {
                 scaleShowGridLines : false,
                 scaleGridLineColor : "steelblue",
@@ -90,42 +158,43 @@ $(document).ready(function() {
                 offsetGridLines : false,
             });
 
-            var minness = Math.min.apply(null, data["quote"]);
-            var maxness = Math.max.apply(null, data["quote"]);
-            var longness = data["quote"].length;
 
-            var worker = new Worker('/static/stockmusic_app/task.js');
-            var currentMood = "normal";
-            var chartColor = "white";
+            // var minness = Math.min.apply(null, data["quote"]);
+            // var maxness = Math.max.apply(null, data["quote"]);
+            // var longness = data["quote"].length;
 
-            worker.addEventListener('message', function(e) {
-                myStuff.play();
-                console.log("mooooood", currentMood);
-                if (e.data[0][0] != currentMood) {
-                    if (e.data[0][0] == "happy") {
-                        chartColor = "green"
-                    } else if (e.data[0][0] == "sad") {
-                        chartColor = "red"
-                    } else {
-                        chartColor = "white"
-                    }
-                    currentMood = e.data[0][0]
-                };
+            // var worker = new Worker('/static/stockmusic_app/task.js');
+            // var currentMood = "normal";
+            // var chartColor = "white";
 
-                console.log("datuhh", e.data);
+            // worker.addEventListener('message', function(e) {
+            //     myStuff.play();
+            //     console.log("mooooood", currentMood);
+            //     if (e.data[0].mood != currentMood) {
+            //         if (e.data[0].mood == "happy") {
+            //             chartColor = "green"
+            //         } else if (e.data[0].mood == "sad") {
+            //             chartColor = "red"
+            //         } else {
+            //             chartColor = "white"
+            //         }
+            //         currentMood = e.data[0].mood
+            //     };
 
-                mySynth.set("carrier.freq", e.data[0][1]);
-                mySynth2.set("mod.freq", e.data[0][1]*2);
-                // mySynth.set("mod.freq", e.data[0][1]*(3/2));
-                dataGrapher(data["quote"].slice(0, e.data[1]+2), minness, maxness, longness, chartColor);
-                if(e.data[1]+2 == longness) {
-                    setTimeout(function() {
-                        myStuff.stop();
-                    }, 1000);
-                };
-            }, false);
-            dataGrapher(data["quote"].slice(0, 1), minness, maxness, longness, chartColor);
-            worker.postMessage([data["frequency_sequence"], speed]);
+            //     console.log("datuhh", e.data);
+
+            //     mySynth.set("left.freq", e.data[0].pitch);
+            //     mySynth.set("right.freq", e.data[0].harmony);
+            //     // mySynth.set("mod.freq", e.data[0][1]*(3/2));
+            //     dataGrapher(data["quote"].slice(0, e.data[1]+2), minness, maxness, longness, chartColor);
+            //     if(e.data[1]+2 == longness) {
+            //         setTimeout(function() {
+            //             myStuff.stop();
+            //         }, 1000);
+            //     };
+            // }, false);
+            // dataGrapher(data["quote"].slice(0, 1), minness, maxness, longness, chartColor);
+            // worker.postMessage([data["frequency_sequence"], speed]);
         });
         $(this).children("input[name]").val("");
     });
@@ -138,7 +207,7 @@ $(document).ready(function() {
         };
         scaleCounter += 1;
         scaleCounter = Math.abs(scaleCounter);
-        mySynth.set("carrier.freq", major[scaleCounter % major.length]);
+        mySynth.set("left.freq", major[scaleCounter % major.length]);
     });
     $("#pitch_down").on("click", function() {
         if (scaleCounter == 0) {
@@ -146,7 +215,7 @@ $(document).ready(function() {
         };
         scaleCounter -= 1;
         scaleCounter = Math.abs(scaleCounter);
-        mySynth.set("carrier.freq", major[scaleCounter % major.length]);
+        mySynth.set("right.freq", major[scaleCounter % major.length]);
     });
     $("#shut_up").on("click", function() {
         myStuff.stop()
