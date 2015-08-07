@@ -153,7 +153,7 @@ def make_notes_v2(quotes):
                     if octave <= 0.25:
                         octave = .5
                     else:
-                        octave += 1
+                        octave = int(octave+1)
                 scaleCounter += 1
                 scaleCounter = abs(scaleCounter)
                 mood_pitch_price_harmony["pitch"] = octave * major[scaleCounter % len(major)]
@@ -167,8 +167,11 @@ def make_notes_v2(quotes):
                     scaleCounter = 3
                     if octave > 1:
                         octave -= 1
-                    else:
+                    elif octave >= 0.5:
                         octave = octave*0.5
+
+                    # else:
+                    #     octave = octave*0.5
                 scaleCounter -= 1
                 scaleCounter = abs(scaleCounter)
                 mood_pitch_price_harmony["pitch"] = octave * minor[scaleCounter % len(minor)]
