@@ -1,14 +1,25 @@
 body {
-    /*font-family: 'Lato', sans-serif;*/
-    /*height: 50em;*/
+    font-family: 'Exo 2', sans-serif;
     background: linear-gradient(0deg, white, lightblue);
     background-repeat: no-repeat;
 }
 
 #stocksong {
-    color: steelblue;
+    color: white;
+    text-shadow: 0 0 5px blue;
 }
 
-#myChart {
-    color: yellow;
+.jumbotron {
+    background-image: url("blam.jpg");
+    background-size: cover;
+}
+
+#form_and_chart {
+    display: inline-block;
+    width: 100%;
+}
+
+#form_left, #chart_right {
+    width: 45%;
+    display: inline-block;
 }
