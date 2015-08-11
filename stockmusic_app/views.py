@@ -19,8 +19,11 @@ class YahooView(View):
         request_dict = dict(request.GET)
 
         fixed_dict = {k: v[0] for k, v in request_dict.items()}
+        print(fixed_dict)
 
         duration = fixed_dict["duration"]
+
+        lookback = fixed_dict["lookback"]
 
         instrument = fixed_dict["instrument"]
         print(instrument, type(instrument))
@@ -49,34 +52,37 @@ class YahooView(View):
             q = json.loads(sliced)
             quote = q['query']['results']['quote']
             dumberer = [float(quote[idx]['Adj_Close']) for idx in range(len(quote)-1, -1, -1)]
-            return JsonResponse({"quote": dumberer, "frequency_sequence": make_notes_v2(dumberer), "instrument": instrument})
+            return JsonResponse({"quote": dumberer, "frequency_sequence": make_notes_v2(dumberer, int(lookback)), "instrument": instrument})
         except:
             return JsonResponse({"error": "Invalid ticker and/or date range."})
 
 
-def make_notes_v2(quotes):
+def make_notes_v2(quotes, lookback):
     major = [261.626, 329.628, 391.995, 493.883]
     minor = [261.626, 311.127, 369.994, 440.000]
     frequency_sequence = []
     octave = 1
     scaleCounter = 0
     start = 0
-    lookback = 4
+    # lookback -= 1
 
     for index in range(len(quotes)):
 
         mood_pitch_price_harmony = dict()
         mood = "normal"
 
-        if index < lookback-1:
-            start = 0
+        if index < lookback:
+            moving_average = 0
         else:
-            start = lookback
+            start = index - lookback+1
+            current = quotes[start:index+1]
+            # print("len of current", len(current))
+            moving_average = sum(current)/lookback
+            # print("------------", moving_average, quotes[index], moving_average < quotes[index])
 
-        current = quotes[start:index+1]
-        moving_average = sum(current)/(index+1)
-
-        if quotes[index] > moving_average:
+        if moving_average == 0:
+            mood = "normal"
+        elif quotes[index] > moving_average:
             mood = "happy"
         elif quotes[index] < moving_average:
             mood = "sad"
@@ -95,7 +101,7 @@ def make_notes_v2(quotes):
                 scaleCounter = abs(scaleCounter)
                 mood_pitch_price_harmony["pitch"] = octave * major[scaleCounter % len(major)]
                 if scaleCounter == 3:
-                    mood_pitch_price_harmony["harmony"] = octave * major[scaleCounter-1 % len(major)]
+                    mood_pitch_price_harmony["harmony"] = mood_pitch_price_harmony["pitch"] * (6/5)
                 else:
                     mood_pitch_price_harmony["harmony"] = octave * major[scaleCounter+1 % len(major)]
 
@@ -110,10 +116,13 @@ def make_notes_v2(quotes):
                 scaleCounter -= 1
                 scaleCounter = abs(scaleCounter)
                 mood_pitch_price_harmony["pitch"] = octave * minor[scaleCounter % len(minor)]
-                if scaleCounter == 3:
-                    mood_pitch_price_harmony["harmony"] = octave * minor[scaleCounter-1 % len(minor)]
-                else:
-                    mood_pitch_price_harmony["harmony"] = octave * minor[scaleCounter+1 % len(minor)]
+                mood_pitch_price_harmony["harmony"] = mood_pitch_price_harmony["pitch"] * (16/15)
+
+                # (99/70) tritone
+                # if scaleCounter == 3:
+                #     mood_pitch_price_harmony["harmony"] = octave * minor[scaleCounter-1 % len(minor)]
+                # else:
+                #     mood_pitch_price_harmony["harmony"] = octave * minor[scaleCounter+1 % len(minor)]
 
         mood_pitch_price_harmony["price"] = quotes[index]
         frequency_sequence.append(mood_pitch_price_harmony)
@@ -121,4 +130,8 @@ def make_notes_v2(quotes):
 
     return frequency_sequence
 
-# show price as chart draws; make it pausable, scrubbable (take button input, kill worker, render entire array as graph, let left or right increase and/or decrease dataset, pipe that data at every point, showing data, etc.); make it more obvious when trend reverses; bookmarkable? maybe not worth it. just make it as useful as possible. probably get rid of chart.js
+#make it pausable, scrubbable (take button input, kill worker, render entire array as graph, let left or right increase and/or decrease dataset, pipe that data at every point, showing data, etc.);
+
+# bookmarkable? maybe not worth it.
+
+# just make it as useful as possible. probably get rid of chart.js

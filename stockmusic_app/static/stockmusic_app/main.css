@@ -23,3 +23,20 @@ body {
     width: 45%;
     display: inline-block;
 }
+
+#chart_right{
+    float: right;
+}
+
+#price_display {
+    position: absolute;
+    text-align: center;
+    font-size: 8em;
+    width: 1000;
+    height: 310;
+    opacity:0.5;
+}
+
+/*.innur {
+  position: absolute;
+}*/

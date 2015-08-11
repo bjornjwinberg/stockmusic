@@ -24,7 +24,6 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/mustache.js/2.1.3/mustache.min.js"></script>
 
 
-
     <link href='http://fonts.googleapis.com/css?family=Exo+2' rel='stylesheet' type='text/css'>
     <link rel="stylesheet" href="{% static 'stockmusic_app/main.css' %}">
     <script src="{% static 'stockmusic_app/flocking-all.min.js' %}"></script>
@@ -64,20 +63,24 @@
       <div class="jumbotron">
         <h1 id="stocksong">$tock$ong</h1>
         <p>
-        <button type="button" class="btn btn-success" id="start">start</button>
-        <button type="button" class="btn btn-info" id="pitch_up">up</button>
-        <button type="button" class="btn btn-primary" id="pitch_down">down</button>
-        <button type="button" class="btn btn-danger" id="shut_up">stop</button>
+        <button type="button" class="btn btn-success" id="start" data-toggle="tooltip" title="This button starts your theremin: vertical for volume, horizontal for pitch.">start</button>
+<!--         <button type="button" class="btn btn-info" id="pitch_up">up</button>
+        <button type="button" class="btn btn-primary" id="pitch_down">down</button> -->
+        <button type="button" class="btn btn-danger" id="shut_up" data-toggle="tooltip" title="This button stops your theremin.">stop</button>
+        <!-- <div id="price_display"></div> -->
+        <div id="threshold_display"></div>
         </p>
       </div>
+
 <div id="form_and_chart">
+
     <div id="form_left">
     <form class="form-horizontal" role="form" id="stock_form" method="GET" action="/stockmusic_app/prices">
 
       <div class="form-group">
-        <label class="control-label col-sm-2" for="email">Company:</label>
+        <label class="control-label col-sm-2" for="pwd" data-toggle="tooltip" title="Please enter a valid ticker. Examples: aapl, spy, brk-a, fb.">Company:</label>
         <div class="col-sm-10">
-            <select name="company" autofocus>
+            <select name="company" autofocus class="form-control">
                 <option value="aapl">Apple</option>
                 <option value="fb">Facebook</option>
                 <option value="qqq">NASDAQ 100</option>
@@ -95,16 +98,16 @@
       </div>
 
       <div class="form-group">
-        <label class="control-label col-sm-2" for="pwd">Start Date:</label>
+        <label class="control-label col-sm-2" for="pwd" data-toggle="tooltip" title="Enter a valid start date. Please note that if you enter a date before the company was publicly listed, or if Yahoo Finance's API just doesn't have the data, an error message will display.">Start:</label>
         <div class="col-sm-10">
-          <input type="date" name="start_date" required value="2005-01-01" min="2005-01-01" max="2015-08-07">
+          <input type="date" name="start_date" required value="2005-01-01" min="2005-01-01" max="2015-08-07" class="form-control">
         </div>
       </div>
 
       <div class="form-group">
-        <label class="control-label col-sm-2" for="pwd">Duration:</label>
+        <label class="control-label col-sm-2" for="pwd" data-toggle="tooltip" title="Yahoo Finance's API doesn't return querysets that span more than about 18 months, so this field is capped below that.">Duration:</label>
         <div class="col-sm-10">
-            <select name="duration">
+            <select name="duration" class="form-control">
                 <option value="7">1 week</option>
                 <option value="30">1 month</option>
                 <option value="90">3 months</option>
@@ -115,9 +118,23 @@
       </div>
 
       <div class="form-group">
-        <label class="control-label col-sm-2" for="pwd">Tempo:</label>
+        <label class="control-label col-sm-2" for="pwd" data-toggle="tooltip" title="This is the number of trailing days used to calculate the current moving average. Higher values are generally better for tracking long-term trends.">Lookback:</label>
         <div class="col-sm-10">
-            <select name="tempo">
+          <input type="number" name="lookback" min="2" max="365" value="5" class="form-control">
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label class="control-label col-sm-2" for="pwd" data-toggle="tooltip" title="Percentage change necessary from initial price to trigger an alert.">Threshold:</label>
+        <div class="col-sm-10">
+          <input type="number" name="threshold" min="-20" max="20" value="5" class="form-control">
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label class="control-label col-sm-2" for="pwd" data-toggle="tooltip" title="Higher values mean a slower song and chart.">Tempo:</label>
+        <div class="col-sm-10">
+            <select name="tempo" class="form-control">
                 <option value="50">50</option>
                 <option value="100">100</option>
                 <option value="150">150</option>
@@ -128,42 +145,47 @@
       </div>
 
       <div class="form-group">
-        <label class="control-label col-sm-2" for="pwd">Instrument:</label>
+        <label class="control-label col-sm-2" for="pwd" data-toggle="tooltip" title="The character of the synthesizer. Castlevania is a good all-around choice.">Instrument:</label>
         <div class="col-sm-10">
-            <select name="instrument">
-                <option value="castlevania">castlevania</option>
-                <option value="r2d2">r2d2</option>
+            <select name="instrument" class="form-control">
+                <option value="castlevania">Castlevania</option>
+                <option value="r2d2">R2D2</option>
             </select>
         </div>
       </div>
 
       <div class="form-group">
-        <label class="control-label col-sm-2" for="pwd">Submit:</label>
+        <label class="control-label col-sm-2" for="pwd"></label>
         <div class="col-sm-10">
-            <input type="submit" value="Submit">
+            <input type="submit" value="Submit" class="form-control">
         </div>
       </div>
 
     </form>
     </div>
+
     <div id="chart_right">
-        <canvas id="myChart" width="400" height="400"></canvas>
+        <canvas id="myChart" width="520" height="400"></canvas>
+    </div>
+
+    <div class="outur">
+        <div class = "innur" id="fuckup"></div>
+        <div class = "innur" id="price_display"></div>
+        <div class = "innur" id="lineBackground"></div>​
     </div>
 </div>
-        <div id="fuckup"></div>
 
-        <div id="lineBackground"></div>​
 
     </div> <!-- /container -->
 
   </body>
 
   {% verbatim %}
-  <script id="fuckup2" type="x-tmpl-mustache">
-      <div class="alert alert-danger" role="alert">
-        <p>{{error}}</p>
-      </div>
-  </script>
+      <script id="fuckup2" type="x-tmpl-mustache">
+          <div class="alert alert-danger" role="alert">
+            <p>{{error}}</p>
+          </div>
+      </script>
   {% endverbatim %}
 
 </html>

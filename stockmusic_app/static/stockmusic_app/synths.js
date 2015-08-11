@@ -1,4 +1,6 @@
-var castlevania = [
+var synths = {};
+
+synths.castlevania = [
     {
         id: "left",
         ugen: "flock.ugen.tri",
@@ -13,16 +15,45 @@ var castlevania = [
     }
 ];
 
-var user = [
+synths.threshold = [
     {
-        id: "user",
+        id: "threshold",
         ugen: "flock.ugen.saw",
-        freq: 261.626/4,
-        mul: 0.03,
+        freq: 261.626/2,
+        mul: 0.3,
     }
 ];
 
-var r2d2 = [
+synths.user = [
+    {
+        id: "user",
+        ugen: "flock.ugen.sinOsc",
+        freq: {
+            ugen: "flock.ugen.mouse.cursor",
+            rate: "control",
+            mul: 261.626,
+            add: 261.626,
+            options: {
+                axis: "width",
+                target: "body"
+            }
+        },
+        mul: {
+            ugen: "flock.ugen.mouse.cursor",
+            rate: "control",
+            options: {
+                axis: "height",
+                target: "body"
+            },
+            mul: 0.2
+        }
+    }
+];
+
+
+
+
+synths.r2d2 = [
     {
         id: "left",
         ugen: "flock.ugen.saw",
