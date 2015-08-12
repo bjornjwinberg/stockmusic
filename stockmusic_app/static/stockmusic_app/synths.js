@@ -4,23 +4,86 @@ synths.castlevania = [
     {
         id: "left",
         ugen: "flock.ugen.tri",
-        freq: 261.626,
+        freq: 0,
         mul: 0.2,
     },
     {
         id: "right",
         ugen: "flock.ugen.tri",
-        freq: 262,
+        freq: 0,
         mul: 0.3,
     }
 ];
 
-synths.threshold = [
+// synths.Rotator = [
+//     {
+//         id: "left",
+//         ugen: "flock.ugen.tri",
+//         freq: 0,
+//         mul: {
+//             ugen: "flock.ugen.sinOsc",
+//             freq: 3
+//         }
+//     },
+//     {
+//         id: "right",
+//         ugen: "flock.ugen.tri",
+//         freq: 0,
+//         mul: {
+//             ugen: "flock.ugen.sinOsc",
+//             freq: 2
+//         }
+//     }
+// ];
+
+
+
+// var synth = flock.synth({
+//     synthDef: {
+//         ugen: "flock.ugen.sinOsc",
+//         freq: 440,
+//         mul: {
+//             ugen: "flock.ugen.asr",
+//             start: 0.0,
+//             attack: 0.25,
+//             sustain: 0.25,
+//             release: 1.0,
+//             gate: {
+//                 ugen: "flock.ugen.impulse",
+//                 rate: "control",
+//                 freq: 0.75,
+//                 phase: 1.0
+//             }
+//         }
+//     }
+// });
+
+
+synths.positiveThreshold = [
     {
-        id: "threshold",
-        ugen: "flock.ugen.saw",
-        freq: 261.626/2,
-        mul: 0.3,
+        id: "positiveThreshold",
+        ugen: "flock.ugen.sinOsc",
+        freq: {
+            ugen: "flock.ugen.xLine",
+            rate: "control",
+            duration: 1.0,
+            start: 261.626,
+            end: 1050.504
+        },
+        mul: 0.25
+    }
+];
+
+synths.negativeThreshold = [
+    {
+        id: "negativeThreshold",
+        ugen: "flock.ugen.sinOsc",
+        freq: 440,
+        mul: {
+            ugen: "flock.ugen.sinOsc",
+            freq: 5.0,
+            mul: 0.3
+        },
     }
 ];
 
@@ -46,18 +109,15 @@ synths.user = [
                 target: "body"
             },
             mul: 0.2
-        }
+        },
     }
 ];
 
-
-
-
-synths.r2d2 = [
+synths.wobbly = [
     {
         id: "left",
         ugen: "flock.ugen.saw",
-        freq: 261.626,
+        freq: 0,
         mul: 0.05,
         phase: {
            id: "mod",
@@ -74,7 +134,7 @@ synths.r2d2 = [
     {
         id: "right",
         ugen: "flock.ugen.sinOsc",
-        freq: 262,
+        freq: 0,
         mul: 0.2,
         phase: {
            id: "mod",

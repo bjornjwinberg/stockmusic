@@ -1,76 +1,113 @@
 "use strict"
 
-var major = [261.626, 293.665, 329.628, 349.228, 391.995, 440.000, 493.883];
-var scaleCounter = 0;
+// var major = [261.626, 293.665, 329.628, 349.228, 391.995, 440.000, 493.883];
+// var scaleCounter = 0;
 
-function startD3(data, speed, threshold) {
+function startD3(data, speed, positiveThreshold, negativeThreshold) {
     var instrument;
 
     if (data["instrument"] == "castlevania") {
         instrument = window.synths.castlevania
-    } else if (data["instrument"] == "r2d2") {
-        instrument = window.synths.r2d2
+    } else if (data["instrument"] == "wobbly") {
+        instrument = window.synths.wobbly
     };
-
-    var minness = Math.min.apply(null, data["quote"]);
-    var maxness = Math.max.apply(null, data["quote"]);
+    console.log(data["quote"])
+    var minness = d3.min(data["quote"],function(d){return d["Adj_Close"];});
+    var maxness = d3.max(data["quote"],function(d){return d["Adj_Close"];});
+    console.log(minness, maxness);
     var longness = data["quote"].length;
 
     var worker = new Worker('/static/stockmusic_app/task.js');
+
+    $("#stop_worker").on("click", function() {
+        myStuff.stop();
+        chartSynth.pause();
+        worker.terminate();
+        dataGrapher(data["frequency_sequence"], minness, maxness, longness, chartColor, positiveThresholdMet, positiveThresholdIndex, positiveThresholdPrice, negativeThresholdMet, negativeThresholdIndex, negativeThresholdPrice, data["quote"], chartSynth);
+        $("#price_display").html("");
+    });
+
     var currentMood = "normal";
     var chartColor = "white";
     var priceDisplay = 0;
 
     var chartSynth = myStuff.create(instrument);
-    var thresholdSynth = myStuff.create(window.synths.threshold);
-    thresholdSynth.pause();
-    var thresholdMet = false;
+    // chartSynth.play();
+    var positiveSynth = myStuff.create(window.synths.positiveThreshold);
+    // positiveSynth.pause();
+    var negativeSynth = myStuff.create(window.synths.negativeThreshold);
+    // negativeSynth.pause();
 
-    var thresholdPrice;
-    var thresholdIndex;
+    var positiveThresholdMet = false;
+    var positiveThresholdPrice;
+    var positiveThresholdIndex;
 
+    var negativeThresholdMet = false;
+    var negativeThresholdPrice;
+    var negativeThresholdIndex;
+
+    // myStuff.start();
     worker.addEventListener('message', function(e) {
+        chartSynth.play();
 
-        myStuff.play();
+        // myStuff.start();
 
-        if (e.data[0].mood != currentMood) {
-            if (e.data[0].mood == "happy") {
+        var chordData = data['frequency_sequence'][e.data[0]]
+
+        if (chordData.mood != currentMood) {
+            if (chordData.mood == "happy") {
                 chartColor = "rgba(0,255,0,0.3)"
-            } else if (e.data[0].mood == "sad") {
+            } else if (chordData.mood == "sad") {
                 chartColor = "rgba(255,0,0,0.3)"
             } else {
                 chartColor = "white"
             }
-            currentMood = e.data[0].mood
+            currentMood = chordData.mood
         };
 
         // console.log("datuhh", typeof e.data);
-        // console.log("e.data[0]", typeof e.data[0].price, e.data[0].price);
+        // console.log("chordData", typeof chordData.price, chordData.price);
         // console.log("data['quote']", typeof data["quote"][0], data["quote"][0]);
-        // console.log("perceeeent", (e.data[0].price - data["quote"][0]) / data["quote"][0] * 100);
+        // console.log("perceeeent", (chordData.price - data["quote"][0]) / data["quote"][0] * 100);
 
-        if (!thresholdMet && (e.data[0].price - data["quote"][0]) / data["quote"][0] >= threshold/100) {
-            thresholdMet = true;
-            thresholdPrice = e.data[0].price;
-            thresholdIndex = e.data[1];
+
+        if (!positiveThresholdMet && (chordData.price - data["quote"][0]["Adj_Close"]) / data["quote"][0]["Adj_Close"]*100 >= positiveThreshold) {
+            positiveThresholdMet = true;
+            positiveThresholdPrice = chordData.price;
+            positiveThresholdIndex = e.data[0];
             // console.log("exceeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeded");
-            thresholdSynth.play();
+            positiveSynth.play();
             setTimeout(function() {
-                thresholdSynth.pause();
-                }, 1000);
+                positiveSynth.pause();
+                }, 2000);
             };
 
-        priceDisplay = e.data[0].price;
-        $("#price_display").html(priceDisplay);
+        if (!negativeThresholdMet && (chordData.price - data["quote"][0]["Adj_Close"]) / data["quote"][0]["Adj_Close"]*100 <= negativeThreshold) {
+            negativeThresholdMet = true;
+            negativeThresholdPrice = chordData.price;
+            negativeThresholdIndex = e.data[0];
+            // console.log("exceeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeded");
+            negativeSynth.play();
+            setTimeout(function() {
+                negativeSynth.pause();
+                }, 2000);
+            };
 
+        // priceDisplay = chordData.price;
+
+        $("#price_display > h1").html(chordData.price);
+        $("#date_display > h1").html(data["quote"][e.data[0]]["Date"]);
+        $("#volume_display > h1").html(data["quote"][e.data[0]]["Volume"]);
+        // $("#volume_display").html(dataQuote[chordIdx]["Volume"]);
+        // console.log(chordData)
         chartSynth.set({
-            "left.freq": e.data[0].pitch,
-            "right.freq": e.data[0].harmony
+            "left.freq": chordData.pitch,
+            "right.freq": chordData.harmony
         });
+        dataGrapher(data["frequency_sequence"].slice(0, e.data[0]+1), minness, maxness, longness, chartColor, positiveThresholdMet, positiveThresholdIndex, positiveThresholdPrice, negativeThresholdMet, negativeThresholdIndex, negativeThresholdPrice, data["quote"]);
+        // dataGrapher(data["quote"].slice(0, e.data[0]+2), minness, maxness, longness, chartColor, positiveThresholdMet, positiveThresholdIndex, positiveThresholdPrice, negativeThresholdMet, negativeThresholdIndex, negativeThresholdPrice);
 
-        dataGrapher(data["quote"].slice(0, e.data[1]+2), minness, maxness, longness, chartColor, thresholdMet, thresholdIndex, thresholdPrice);
-
-        if(e.data[1]+2 == longness) {
+        if(e.data[0]+1 == longness) {
             setTimeout(function() {
                 chartSynth.pause();
             }, 1000);
@@ -78,12 +115,13 @@ function startD3(data, speed, threshold) {
 
     }, false);
 
-    dataGrapher(data["quote"].slice(0, 1), minness, maxness, longness, chartColor);
-    worker.postMessage([data["frequency_sequence"], speed]);
+    // dataGrapher(data["quote"].slice(0, 1), minness, maxness, longness, chartColor);
+    worker.postMessage([longness, speed]);
+    // worker.postMessage([data["frequency_sequence"], speed]);
 
 };
 
-function dataGrapher(data, minness, maxness, longness, chartColor, thresholdMet, thresholdIndex, thresholdPrice) {
+function dataGrapher(data, minness, maxness, longness, chartColor, positiveThresholdMet, positiveThresholdIndex, positiveThresholdPrice, negativeThresholdMet, negativeThresholdIndex, negativeThresholdPrice, dataQuote, chartSynth) {
     $("#lineBackground").empty();
 
     var svg = d3.select("#lineBackground")
@@ -92,27 +130,95 @@ function dataGrapher(data, minness, maxness, longness, chartColor, thresholdMet,
       .attr("height", 310)
       .attr("id", "visualization");
 
-    var x = d3.scale.linear().domain([0, longness]).range([0, 1100]);
+    var x = d3.scale.linear().domain([0, longness]).range([10, 1050]);
     var y = d3.scale.linear().domain([maxness, minness]).range([10, 300]);
     var line = d3.svg.line()
       .interpolate("monotone")
       .x(function(d,i) {return x(i);})
       .y(function(d) {
-        return y(d);});
+        return y(d.price);});
 
-    var path = svg.append("path")
-      .attr("d", line(data))
-      .attr("stroke", "steelblue")
-      .attr("stroke-width", "5")
-      .attr("fill", chartColor);
+    var path = svg.append('path')
+      .attr('class', 'line')
+      .attr('d', line(data))
+      .style('fill', chartColor)
+      .style('stroke', 'steelblue')
+      .style('pointer-events', 'none')
+      .style('stroke-width', '5');
 
-    if (thresholdMet) {
+    if (chartSynth){
+        var marker = svg.append('circle')
+          .attr('r', 5)
+          .style('display', 'none')
+          .style('fill', '#FFFFFF')
+          .style('pointer-events', 'none')
+          .style('stroke', '#FB5050')
+          .style('stroke-width', '3px');
+
+        var node = path.node(),
+          points = [];
+        for (var i = 0; i < node.getTotalLength(); i++) {
+          points.push(node.getPointAtLength(i));
+        }
+
+        var bisect = d3.bisector(function(datum) {
+          return datum.x;
+        }).right;
+        console.log("svg", svg);
+        svg.on('mouseover', function() {
+          marker.style('display', 'inherit');
+        }).on('mouseout', function() {
+            chartSynth.pause();
+          marker.style('display', 'none');
+        }).on('mousemove', function() {
+            var mouse = d3.mouse(this),
+            index = bisect(points, mouse[0]);
+            if (index < points.length) {
+                var point = points[index];
+                marker.attr('cx', point.x);
+                marker.attr('cy', point.y);
+                var chordIdx = parseInt(x.invert(point.x)+0.1);
+                console.log(x.invert(point.x));
+                console.log(chordIdx);
+                $("#price_display").html(data[chordIdx].price);
+                $("#date_display").html(dataQuote[chordIdx]["Date"]);
+                $("#volume_display").html(dataQuote[chordIdx]["Volume"]);
+                chartSynth.set({
+                    "left.freq": data[chordIdx].pitch,
+                    "right.freq": data[chordIdx].harmony
+                });
+
+                // if (data[chordIdx].price < positiveThresholdPrice) {
+                //     chartColor = "white"
+                // } else if (data[chordIdx].price > positiveThresholdPrice)
+
+                // chartColor = "rgba(0,255,0,0.3)"
+                // } else if (chordData.mood == "sad") {
+                // chartColor = "rgba(255,0,0,0.3)"
+                // white
+
+                chartSynth.play()
+            }
+        });
+    }
+
+    if (positiveThresholdMet) {
         d3.select("svg").append("circle")
             .attr("r", 10)
-            .attr("cx", x(thresholdIndex))
-            .attr("cy", y(thresholdPrice))
-            .style("fill", "blue")
-            .style("stroke", "red")
+            .attr("cx", x(positiveThresholdIndex))
+            .attr("cy", y(positiveThresholdPrice))
+            .style("fill", "green")
+            .style("stroke", "blue")
+            .style("stroke-width", "2px");
+    };
+
+    if (negativeThresholdMet) {
+        d3.select("svg").append("circle")
+            .attr("r", 10)
+            .attr("cx", x(negativeThresholdIndex))
+            .attr("cy", y(negativeThresholdPrice))
+            .style("fill", "red")
+            .style("stroke", "black")
             .style("stroke-width", "2px");
     };
 
@@ -128,9 +234,11 @@ function dataGrapher(data, minness, maxness, longness, chartColor, thresholdMet,
 };
 
 $(document).ready(function() {
-    setTimeout(function(){ alert("Hover over things to read about what they do!"); }, 500);
-    // $("#price_display").animate({"top": "+=200px"}, 1000);
-    // $("#threshold_display").animate({"left": "+=600px"}, 1000);
+
+    var template = $("#welcome2").html();
+    var rendered = Mustache.render(template, "hi");
+    $("#welcome").html(rendered);
+    $("#welcome").fadeOut(4000);
 
     var userSynth = myStuff.create (
         window.synths.user
@@ -138,25 +246,17 @@ $(document).ready(function() {
 
     userSynth.pause();
 
-    $("body").on("finished", function(event, killInterval) {
-        window.clearInterval(killInterval);
-        myStuff.stop()
-    });
-
     $("#stock_form").on("submit", function() {
         event.preventDefault();
         $("#fuckup").empty();
 
         var speed = Number($('select[name="tempo"]').val());
         var lookback = Number($('input[name="lookback"]').val());
-        var threshold = Number($('input[name="threshold"]').val());
+        var positiveThreshold = Number($('input[name="positive-threshold"]').val());
+        var negativeThreshold = Number($('input[name="negative-threshold"]').val());
         var formData = $(this).serialize();
-        alert(""window.location.href + formData);
-
-        // console.log("formdata:", formData);
 
         $.get($(this).attr("action"), formData, function(data) {
-            // console.log(data)
             if (data.error) {
                 var template = $("#fuckup2").html();
                 var rendered = Mustache.render(template, data);
@@ -171,18 +271,20 @@ $(document).ready(function() {
             //     return avg;
             // };
 
-            var prices = data["quote"];
-            var notes = data["frequency_sequence"].map(function(obj) {
+            var prices = data["quote"].map(function(price) {
+                return price.Adj_Close;
+            });;
+            var d = data["frequency_sequence"].map(function(obj) {
                 return obj.pitch;
             });
 
             // var averagePrice = average(prices);
-            // var averageNote = average(notes);
+            // var averageNote = average(d);
 
             // if (averagePrice > averageNote) {
             //     var multiplier = averagePrice/averageNote;
-            //     for (var i = 0; i < notes.length; i++) {
-            //         notes[i] *= multiplier;
+            //     for (var i = 0; i < d.length; i++) {
+            //         d[i] *= multiplier;
             //     };
             // } else {
             //     var multiplier = averageNote/averagePrice;
@@ -193,49 +295,49 @@ $(document).ready(function() {
 
             // console.log("data:", data);
             // console.log("prices:", prices);
-            // console.log("notes:", notes);
+            // console.log("d:", d);
 
             var datuh = {
-                labels: notes, prices,
+                labels: d, prices,
                 datasets: [
                     {
                         label: "My first dataset",
                         fillColor: "rgba(255, 255, 0, .3)",
                         strokeColor: "rgba(220,220,220,1)",
-                        pointColor: "rgba(220,220,220,1)",
-                        pointStrokeColor: "#fff",
-                        pointHighlightFill: "#fff",
-                        pointHighlightStroke: "rgba(220,220,220,1)",
+                        // pointColor: "rgba(220,220,220,1)",
+                        // pointStrokeColor: "#fff",
+                        // pointHighlightFill: "#fff",
+                        // pointHighlightStroke: "rgba(220,220,220,1)",
                         data: prices
                     },
                     {
                         label: "My other dataset",
                         fillColor: "rgba(102, 255, 255, .3)",
                         strokeColor: "rgba(220,220,220,1)",
-                        pointColor: "rgba(220,220,220,1)",
-                        pointStrokeColor: "#fff",
-                        pointHighlightFill: "#fff",
-                        pointHighlightStroke: "rgba(220,220,220,1)",
-                        data: notes
+                        // pointColor: "rgba(220,220,220,1)",
+                        // pointStrokeColor: "#fff",
+                        // pointHighlightFill: "#fff",
+                        // pointHighlightStroke: "rgba(220,220,220,1)",
+                        data: d
                     }
                 ]
             };
             var ctx = document.getElementById("myChart").getContext("2d");
             Chart.defaults.global.onAnimationComplete = function() {
 
-                startD3(data, speed, threshold);
+                startD3(data, speed, positiveThreshold, negativeThreshold);
 
             };
             // console.log(Chart.defaults.global)
             new Chart(ctx).Line(datuh, {
-                scaleShowGridLines : false,
+                scaleShowGridLines : true,
                 // scaleBeginAtZero : false,
                 scaleGridLineColor : "steelblue",
                 scaleGridLineWidth : 1,
                 scaleShowHorizontalLines: true,
                 scaleShowVerticalLines: true,
                 bezierCurve : false,
-                bezierCurveTension : .4,
+                // bezierCurveTension : .4,
                 pointDot : true,
                 pointDotRadius : 1,
                 pointDotStrokeWidth : 1,

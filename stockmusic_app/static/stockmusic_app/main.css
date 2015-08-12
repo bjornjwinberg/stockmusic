@@ -28,15 +28,47 @@ body {
     float: right;
 }
 
-#price_display {
-    position: absolute;
-    text-align: center;
-    font-size: 8em;
-    width: 1000;
-    height: 310;
-    opacity:0.5;
+#asdf{
+    /*position: absolute;*/
 }
 
-/*.innur {
-  position: absolute;
-}*/
+#scamp {
+    /*position: absolute;*/
+    width: 100%;
+}
+
+#price_display {
+    border-style: solid;
+    border-radius: .2em;
+    display: inline-block;
+    font-size: 4em;
+    color:red;
+    width: 33%;
+    height: 310;
+    opacity:0.5;
+    text-align: center;
+}
+
+#date_display {
+    display: inline-block;
+    border-style: solid;
+    border-radius: .2em;
+    font-size: 4em;
+    color: green;
+    width: 33%;
+    height: 310;
+    opacity:0.5;
+    text-align: center;
+}
+
+#volume_display {
+    display: inline-block;
+    border-style: solid;
+    border-radius: .2em;
+    font-size: 4em;
+    color:blue;
+    width: 33%;
+    height: 310;
+    opacity:0.5;
+    text-align: center;
+}

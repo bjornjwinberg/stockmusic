@@ -11,10 +11,10 @@ function sleep(speed) {
 };
 
 self.addEventListener('message', function(e) {
-    var notes = e.data[0];
+    var songLength = e.data[0];
     var speed = e.data[1];
-    for(var i = 0; i < notes.length; i++) {
-        self.postMessage([notes[i], i])
+    for(var i = 0; i < songLength; i++) {
+        self.postMessage([i])
         sleep(speed)
     };
 }, false);

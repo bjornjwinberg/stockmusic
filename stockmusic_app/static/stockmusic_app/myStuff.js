@@ -8,10 +8,12 @@
 
     myStuff.create = function(instrument) {
         return flock.synth({
-            synthDef: instrument
+            synthDef: instrument,
+            addToEnvironment: false
+
         });
     };
-    myStuff.play = function () {
+    myStuff.start = function () {
         enviro.start();
     };
     myStuff.stop = function () {

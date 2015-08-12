@@ -6,27 +6,28 @@ from django.shortcuts import render
 from django.views.generic import View
 
 
-class IndexView(View):
-
+class Index(View):
     def get(self, request):
         return render(request, "stockmusic_app/flocking.html")
 
 
-class YahooView(View):
+class About(View):
+    def get(self, request):
+        return render(request, "stockmusic_app/homepage.html")
 
+
+class Yahoo(View):
     def get(self, request):
 
         request_dict = dict(request.GET)
 
         fixed_dict = {k: v[0] for k, v in request_dict.items()}
-        print(fixed_dict)
 
         duration = fixed_dict["duration"]
 
         lookback = fixed_dict["lookback"]
 
         instrument = fixed_dict["instrument"]
-        print(instrument, type(instrument))
 
         start_date = datetime.datetime.strptime(fixed_dict["start_date"], "%Y-%m-%d")
 
@@ -51,8 +52,11 @@ class YahooView(View):
             sliced = c[start:-3]
             q = json.loads(sliced)
             quote = q['query']['results']['quote']
-            dumberer = [float(quote[idx]['Adj_Close']) for idx in range(len(quote)-1, -1, -1)]
-            return JsonResponse({"quote": dumberer, "frequency_sequence": make_notes_v2(dumberer, int(lookback)), "instrument": instrument})
+            for idx in range(len(quote)):
+                quote[idx]["Adj_Close"] = float(quote[idx]["Adj_Close"])
+                quote[idx]["Volume"] = int(quote[idx]["Volume"])
+            quote.reverse()
+            return JsonResponse({"quote": quote, "frequency_sequence": make_notes_v2(quote, int(lookback)), "instrument": instrument})
         except:
             return JsonResponse({"error": "Invalid ticker and/or date range."})
 
@@ -64,7 +68,6 @@ def make_notes_v2(quotes, lookback):
     octave = 1
     scaleCounter = 0
     start = 0
-    # lookback -= 1
 
     for index in range(len(quotes)):
 
@@ -76,21 +79,20 @@ def make_notes_v2(quotes, lookback):
         else:
             start = index - lookback+1
             current = quotes[start:index+1]
-            # print("len of current", len(current))
-            moving_average = sum(current)/lookback
-            # print("------------", moving_average, quotes[index], moving_average < quotes[index])
-
+            moving_average = sum(q["Adj_Close"] for q in current)/lookback
         if moving_average == 0:
             mood = "normal"
-        elif quotes[index] > moving_average:
+        elif quotes[index]["Adj_Close"] > moving_average:
             mood = "happy"
-        elif quotes[index] < moving_average:
+        elif quotes[index]["Adj_Close"] < moving_average:
             mood = "sad"
         mood_pitch_price_harmony["mood"] = mood
-        if index + 1 == len(quotes):
-            continue
+
+        if index == 0:
+            mood_pitch_price_harmony["pitch"] = 261.626
+            mood_pitch_price_harmony["harmony"] = 261.626
         else:
-            if quotes[index] < quotes[index+1]:
+            if quotes[index-1]["Adj_Close"] < quotes[index]["Adj_Close"]:
                 if scaleCounter == 3:
                     scaleCounter = -1
                     if octave <= 0.25:
@@ -118,20 +120,11 @@ def make_notes_v2(quotes, lookback):
                 mood_pitch_price_harmony["pitch"] = octave * minor[scaleCounter % len(minor)]
                 mood_pitch_price_harmony["harmony"] = mood_pitch_price_harmony["pitch"] * (16/15)
 
-                # (99/70) tritone
-                # if scaleCounter == 3:
-                #     mood_pitch_price_harmony["harmony"] = octave * minor[scaleCounter-1 % len(minor)]
-                # else:
-                #     mood_pitch_price_harmony["harmony"] = octave * minor[scaleCounter+1 % len(minor)]
-
-        mood_pitch_price_harmony["price"] = quotes[index]
+        mood_pitch_price_harmony["price"] = quotes[index]["Adj_Close"]
         frequency_sequence.append(mood_pitch_price_harmony)
-        # print(mood_pitch_price_harmony, octave)
+        print(mood_pitch_price_harmony)
 
     return frequency_sequence
 
-#make it pausable, scrubbable (take button input, kill worker, render entire array as graph, let left or right increase and/or decrease dataset, pipe that data at every point, showing data, etc.);
-
 # bookmarkable? maybe not worth it.
 
-# just make it as useful as possible. probably get rid of chart.js
