@@ -10,7 +10,12 @@ function startD3(data, speed, positiveThreshold, negativeThreshold) {
         instrument = window.synths.castlevania
     } else if (data["instrument"] == "wobbly") {
         instrument = window.synths.wobbly
+    } else if (data["instrument"] == "rotator") {
+        instrument = window.synths.rotator
+    } else if (data["instrument"] == "theremin") {
+        instrument = window.synths.theremin
     };
+
     console.log(data["quote"])
     var minness = d3.min(data["quote"],function(d){return d["Adj_Close"];});
     var maxness = d3.max(data["quote"],function(d){return d["Adj_Close"];});
@@ -24,7 +29,7 @@ function startD3(data, speed, positiveThreshold, negativeThreshold) {
         chartSynth.pause();
         worker.terminate();
         dataGrapher(data["frequency_sequence"], minness, maxness, longness, chartColor, positiveThresholdMet, positiveThresholdIndex, positiveThresholdPrice, negativeThresholdMet, negativeThresholdIndex, negativeThresholdPrice, data["quote"], chartSynth);
-        $("#price_display").html("");
+        // $("#price_display").html("");
     });
 
     var currentMood = "normal";
@@ -95,9 +100,9 @@ function startD3(data, speed, positiveThreshold, negativeThreshold) {
 
         // priceDisplay = chordData.price;
 
-        $("#price_display > h1").html(chordData.price);
-        $("#date_display > h1").html(data["quote"][e.data[0]]["Date"]);
-        $("#volume_display > h1").html(data["quote"][e.data[0]]["Volume"]);
+        $("#price_display").html(chordData.price);
+        $("#date_display").html(data["quote"][e.data[0]]["Date"]);
+        $("#volume_display").html(data["quote"][e.data[0]]["Volume"]);
         // $("#volume_display").html(dataQuote[chordIdx]["Volume"]);
         // console.log(chordData)
         chartSynth.set({
@@ -146,7 +151,7 @@ function dataGrapher(data, minness, maxness, longness, chartColor, positiveThres
       .style('pointer-events', 'none')
       .style('stroke-width', '5');
 
-    if (chartSynth){
+    if (chartSynth) {
         var marker = svg.append('circle')
           .attr('r', 5)
           .style('display', 'none')
@@ -175,11 +180,14 @@ function dataGrapher(data, minness, maxness, longness, chartColor, positiveThres
             index = bisect(points, mouse[0]);
             if (index < points.length) {
                 var point = points[index];
+                console.log("yyy", point.y);
                 marker.attr('cx', point.x);
                 marker.attr('cy', point.y);
                 var chordIdx = parseInt(x.invert(point.x)+0.1);
-                console.log(x.invert(point.x));
-                console.log(chordIdx);
+                // console.log(x.invert(point.x));
+                // console.log(chordIdx);
+                console.log(data[chordIdx].pitch);
+                console.log(data[chordIdx].harmony);
                 $("#price_display").html(data[chordIdx].price);
                 $("#date_display").html(dataQuote[chordIdx]["Date"]);
                 $("#volume_display").html(dataQuote[chordIdx]["Volume"]);
@@ -234,7 +242,7 @@ function dataGrapher(data, minness, maxness, longness, chartColor, positiveThres
 };
 
 $(document).ready(function() {
-
+    var newChart;
     var template = $("#welcome2").html();
     var rendered = Mustache.render(template, "hi");
     $("#welcome").html(rendered);
@@ -248,6 +256,14 @@ $(document).ready(function() {
 
     $("#stock_form").on("submit", function() {
         event.preventDefault();
+        if (newChart) {
+            newChart.destroy()
+        };
+        // $("#myChart").destroy();
+        // $("#myChart").clear();
+        // $("#myChart").empty();
+        // document.getElementById("myChart").destroy();
+        // ctx.clear();
         $("#fuckup").empty();
 
         var speed = Number($('select[name="tempo"]').val());
@@ -277,6 +293,7 @@ $(document).ready(function() {
             var d = data["frequency_sequence"].map(function(obj) {
                 return obj.pitch;
             });
+            console.log("d", d)
 
             // var averagePrice = average(prices);
             // var averageNote = average(d);
@@ -298,38 +315,48 @@ $(document).ready(function() {
             // console.log("d:", d);
 
             var datuh = {
-                labels: d, prices,
+                labels: d,
                 datasets: [
                     {
                         label: "My first dataset",
-                        fillColor: "rgba(255, 255, 0, .3)",
-                        strokeColor: "rgba(220,220,220,1)",
-                        // pointColor: "rgba(220,220,220,1)",
-                        // pointStrokeColor: "#fff",
-                        // pointHighlightFill: "#fff",
-                        // pointHighlightStroke: "rgba(220,220,220,1)",
-                        data: prices
-                    },
-                    {
-                        label: "My other dataset",
-                        fillColor: "rgba(102, 255, 255, .3)",
-                        strokeColor: "rgba(220,220,220,1)",
+                        fillColor: "rgba(0, 0, 255, .3)",
+                        // strokeColor: "rgba(220,220,220,1)",
+                        strokeColor: "green",
                         // pointColor: "rgba(220,220,220,1)",
                         // pointStrokeColor: "#fff",
                         // pointHighlightFill: "#fff",
                         // pointHighlightStroke: "rgba(220,220,220,1)",
                         data: d
                     }
+                    // {
+                    //     label: "My other dataset",
+                    //     fillColor: "rgba(102, 255, 255, .3)",
+                    //     strokeColor: "rgba(220,220,220,1)",
+                    //     // pointColor: "rgba(220,220,220,1)",
+                    //     // pointStrokeColor: "#fff",
+                    //     // pointHighlightFill: "#fff",
+                    //     // pointHighlightStroke: "rgba(220,220,220,1)",
+                    //     data: d
+                    // }
                 ]
             };
             var ctx = document.getElementById("myChart").getContext("2d");
+            // $("#myChart").destroy();
+            // $("#myChart").clear();
+            // Chart(ctx).clear();
+            Chart.defaults.global.responsive = true;
             Chart.defaults.global.onAnimationComplete = function() {
 
                 startD3(data, speed, positiveThreshold, negativeThreshold);
 
             };
             // console.log(Chart.defaults.global)
-            new Chart(ctx).Line(datuh, {
+
+            // var newChart = new Chart(ctx);
+            // newChart.Line(datuh, {
+
+
+                newChart = new Chart(ctx).Line(datuh, {
                 scaleShowGridLines : true,
                 // scaleBeginAtZero : false,
                 scaleGridLineColor : "steelblue",
@@ -342,7 +369,7 @@ $(document).ready(function() {
                 pointDotRadius : 1,
                 pointDotStrokeWidth : 1,
                 pointHitDetectionRadius : 1,
-                datasetStrokeWidth : 2,
+                datasetStrokeWidth : 5,
                 offsetGridLines : false,
             });
         });

@@ -4,7 +4,7 @@
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <!-- The above 3 meta tags *must* come first in the head; any other head content must come *after* these tags -->
+
     <meta name="description" content="">
     <meta name="author" content="">
 
@@ -14,15 +14,10 @@
     <title>$tock$ong</title>
 
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.min.css">
-
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap-theme.min.css">
-
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
-
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/js/bootstrap.min.js"></script>
-
     <script src="https://cdnjs.cloudflare.com/ajax/libs/mustache.js/2.1.3/mustache.min.js"></script>
-
 
     <link href='http://fonts.googleapis.com/css?family=Exo+2' rel='stylesheet' type='text/css'>
     <link rel="stylesheet" href="{% static 'stockmusic_app/main.css' %}">
@@ -60,24 +55,20 @@
     <div class="container theme-showcase" role="main">
 
       <div class="jumbotron">
-        <h1 id="stocksong">$tock$ong</h1>
-        <p>
-        <button type="button" class="btn btn-success" id="start" data-toggle="tooltip" title="This button starts your theremin: vertical for volume, horizontal for pitch.">start</button>
-<!--         <button type="button" class="btn btn-info" id="pitch_up">up</button>
-        <button type="button" class="btn btn-primary" id="pitch_down">down</button> -->
-        <button type="button" class="btn btn-danger" id="shut_up" data-toggle="tooltip" title="This button stops your theremin.">stop</button>
-<!--         <button type="button" class="btn btn-danger" id="stop_worker" data-toggle="tooltip" title="Stops worker.">Stop Worker</button> -->
-        <!-- <div id="price_display"></div> -->
-        <!-- <div id="threshold_display"></div> -->
-        <div class = "innur" id="fuckup"></div>
-        <div class = "innur" id="welcome"></div>
-        </p>
+
+        <div class="pull-left">
+            <h1 id="stocksong">$tock$ong</h1>
+        </div>
+
+        <div id="jumboRight" class="pull-right">
+            <div id="fuckup"></div>
+            <div id="welcome"></div>
+        </div>
+
       </div>
 
 
 <div id="form_and_chart">
-
-  <!-- <div class = "innur" id="fuckup"></div> -->
 
     <div id="form_left">
     <form class="form-horizontal" role="form" id="stock_form" method="GET" action="/stockmusic_app/prices">
@@ -106,7 +97,7 @@
       <div class="form-group">
         <label class="control-label col-sm-2" for="pwd" data-toggle="tooltip" title="Enter a valid start date. Please note that if you enter a date before the company was publicly listed, or if Yahoo Finance's API just doesn't have the data, an error message will display.">Start Date:</label>
         <div class="col-sm-10">
-          <input type="date" name="start_date" required value="2005-01-01" min="2005-01-01" max="2015-08-07" class="form-control">
+          <input type="date" name="start_date" required value="2005-01-01" min="2005-01-01" max="2015-08-13" class="form-control">
         </div>
       </div>
 
@@ -116,9 +107,11 @@
             <select name="duration" class="form-control">
                 <option value="7">1 week</option>
                 <option value="30" selected="selected">1 month</option>
-                <option value="90">3 months</option>
-                <option value="180">6 months</option>
+                <option value="91">3 months</option>
+                <option value="182">6 months</option>
+                <option value="274">9 months</option>
                 <option value="365">1 year</option>
+                <option value="456">15 months</option>
             </select>
         </div>
       </div>
@@ -163,6 +156,8 @@
             <select name="instrument" class="form-control">
                 <option value="castlevania">Castlevania</option>
                 <option value="wobbly">Wobbly</option>
+                <option value="rotator">Rotator</option>
+                <option value="theremin">Theremin</option>
             </select>
         </div>
       </div>
@@ -170,14 +165,17 @@
       <div class="form-group">
         <label class="control-label col-sm-2" for="pwd"></label>
         <div class="col-sm-10">
-            <input type="submit" value="Submit" class="form-control">
+            <input type="submit" value="SUBMIT" class="form-control" id="submitButton">
         </div>
       </div>
 
     </form>
 
-    <button type="button" class="btn btn-danger" id="stop_worker" data-toggle="tooltip" title="Lets you hover through the chart.">Interactive Mode</button>
-
+    <button type="button" class="btn btn-primary" id="stop_worker" data-toggle="tooltip" title="Lets you hover through the chart.">interactive</button>
+    <button type="button" class="btn btn-success" id="start" data-toggle="tooltip" title="This button starts your theremin: vertical for volume, horizontal for pitch.">start</button>
+<!--         <button type="button" class="btn btn-info" id="pitch_up">up</button>
+    <button type="button" class="btn btn-primary" id="pitch_down">down</button> -->
+    <button type="button" class="btn btn-danger" id="shut_up" data-toggle="tooltip" title="This button stops your theremin.">stop</button>
     </div>
     <div id="chart_right">
         <canvas id="myChart" width="520" height="400"></canvas>
@@ -208,7 +206,7 @@
 
       <script id="welcome2" type="x-tmpl-mustache">
           <div class="alert alert-info" role="alert">
-            <p><b>Welcome! Hover over things for more info!.<b></p>
+            <p><b>Welcome! Hover over things for more info!<b></p>
           </div>
       </script>
   {% endverbatim %}

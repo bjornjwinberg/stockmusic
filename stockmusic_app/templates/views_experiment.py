@@ -62,10 +62,10 @@ class Yahoo(View):
 
 
 def make_notes_v2(quotes, lookback):
-    major = [261.626, 329.628, 391.995, 493.883]
-    minor = [261.626, 311.127, 369.994, 440.000]
+    major = [261.626, 293.665, 329.628, 349.228, 391.995, 440.000, 493.883]
+    minor = [261.626, 277.183, 311.127, 349.228, 391.995, 415.305, 466.164]
     frequency_sequence = []
-    octave = 1
+    octave = 0
     scaleCounter = 0
     start = 0
 
@@ -93,7 +93,7 @@ def make_notes_v2(quotes, lookback):
             mood_pitch_price_harmony["harmony"] = 261.626
         else:
             if quotes[index-1]["Adj_Close"] < quotes[index]["Adj_Close"]:
-                if scaleCounter == 3:
+                if scaleCounter == 6:
                     scaleCounter = -1
                     if octave <= 0.25:
                         octave = .5
@@ -103,16 +103,16 @@ def make_notes_v2(quotes, lookback):
                 scaleCounter += 1
                 scaleCounter = abs(scaleCounter)
                 print("absolute scale counter", scaleCounter)
-                mood_pitch_price_harmony["pitch"] = octave * major[scaleCounter % len(major)]
+                mood_pitch_price_harmony["pitch"] = 2 **octave * major[scaleCounter % len(major)]
                 print("****************", major[scaleCounter % len(major)])
-                if scaleCounter == 3:
+                if scaleCounter == 6:
                     mood_pitch_price_harmony["harmony"] = mood_pitch_price_harmony["pitch"] * (6/5)
                 else:
-                    mood_pitch_price_harmony["harmony"] = octave * major[scaleCounter+1 % len(major)]
+                    mood_pitch_price_harmony["harmony"] = 2 **octave * major[scaleCounter+1 % len(major)]
 
             else:
                 if scaleCounter == 0:
-                    scaleCounter = 3
+                    scaleCounter = 6
                     if octave > 1:
                         octave -= 1
                     elif octave >= 0.5:
@@ -120,8 +120,10 @@ def make_notes_v2(quotes, lookback):
 
                 scaleCounter -= 1
                 scaleCounter = abs(scaleCounter)
-                mood_pitch_price_harmony["pitch"] = octave * minor[scaleCounter % len(minor)]
+                mood_pitch_price_harmony["pitch"] = 2 **octave * minor[scaleCounter % len(minor)]
                 mood_pitch_price_harmony["harmony"] = mood_pitch_price_harmony["pitch"] * (16/15)
+
+
         print("octave", octave)
         mood_pitch_price_harmony["price"] = quotes[index]["Adj_Close"]
         frequency_sequence.append(mood_pitch_price_harmony)
