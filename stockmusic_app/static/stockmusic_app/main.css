@@ -17,9 +17,9 @@ body {
     font-size: 5em;
 }
 
-#jumboRight {
-    margin-top: .7em;
-    font-size: 7em;
+.jumboRight {
+    margin-top: .45em;
+    font-size: 10em;
 }
 
 
@@ -37,15 +37,11 @@ body {
     float: right;
 }
 
-#submitButton {
-
-}
-
 #scamp {
     width: 100%;
 }
 
-#price_display {
+.chartFeedback {
     border-style: solid;
     border-radius: .2em;
     display: inline-block;
@@ -54,26 +50,21 @@ body {
     width: 33%;
     opacity:0.5;
     text-align: center;
+    min-height: 104px;
+}
+
+#price_display {
+    color:red;
 }
 
 #date_display {
-    display: inline-block;
-    border-style: solid;
-    border-radius: .2em;
-    font-size: 4em;
     color: green;
-    width: 33%;
-    opacity:0.5;
-    text-align: center;
 }
 
 #volume_display {
-    display: inline-block;
-    border-style: solid;
-    border-radius: .2em;
-    font-size: 4em;
     color: blue;
-    width: 33%;
-    opacity:0.5;
-    text-align: center;
+}
+
+#lineBackground {
+    min-height: 310px;
 }

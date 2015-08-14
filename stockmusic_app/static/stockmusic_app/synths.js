@@ -1,17 +1,69 @@
 var synths = {};
 
-synths.castlevania = [
+synths.sine = [
+    {
+        id: "left",
+        ugen: "flock.ugen.sinOsc",
+        freq: 261.626,
+        mul: 0.2
+    },
+    {
+        id: "right",
+        ugen: "flock.ugen.sinOsc",
+        freq: 261.626,
+        mul: 0.2
+    }
+];
+
+synths.wobbly = [
+    {
+        id: "left",
+        ugen: "flock.ugen.saw",
+        freq: 0,
+        mul: 0.05,
+        phase: {
+           id: "mod",
+           ugen: "flock.ugen.sinOsc",
+           freq: 34.0,
+           mul: {
+               ugen: "flock.ugen.sinOsc",
+               freq: 1/20,
+               mul: flock.PI
+           },
+           add: flock.PI
+        }
+    },
+    {
+        id: "right",
+        ugen: "flock.ugen.sinOsc",
+        freq: 0,
+        mul: 0.2,
+        phase: {
+           id: "mod",
+           ugen: "flock.ugen.sinOsc",
+           freq: 3,
+           mul: {
+               ugen: "flock.ugen.sinOsc",
+               freq: 1/3,
+               mul: flock.PI
+           },
+           add: flock.PI
+        }
+    }
+];
+
+synths.nintendo = [
     {
         id: "left",
         ugen: "flock.ugen.tri",
         freq: 0,
-        mul: 0.2
+        mul: 0.3
     },
     {
         id: "right",
         ugen: "flock.ugen.tri",
         freq: 0,
-        mul: 0.2
+        mul: 0.3
     }
 ];
 
@@ -55,12 +107,14 @@ synths.negativeThreshold = [
     {
         id: "negativeThreshold",
         ugen: "flock.ugen.sinOsc",
-        freq: 440,
-        mul: {
-            ugen: "flock.ugen.sinOsc",
-            freq: 5.0,
-            mul: 0.2
-        }
+        freq: {
+            ugen: "flock.ugen.xLine",
+            rate: "control",
+            duration: 1.0,
+            start: 1050.504,
+            end: 261.626
+        },
+        mul: 0.2
     }
 ];
 
@@ -71,8 +125,8 @@ synths.user = [
         freq: {
             ugen: "flock.ugen.mouse.cursor",
             rate: "control",
-            mul: 261.626,
-            add: 261.626,
+            mul: 391.995,
+            add: 130.813,
             options: {
                 axis: "width",
                 target: "body"
@@ -86,76 +140,6 @@ synths.user = [
                 target: "body"
             },
             mul: 0.2
-        }
-    }
-];
-
-synths.theremin = [
-    {
-        id: "left",
-        ugen: "flock.ugen.sinOsc",
-        freq: {
-            ugen: "flock.ugen.mouse.cursor",
-            rate: "control",
-            mul: 261.626,
-            add: 261.626,
-            options: {
-                axis: "width",
-                target: "body"
-            }
-        },
-        mul: 0.2
-    },
-    {
-        id: "right",
-        ugen: "flock.ugen.sinOsc",
-        freq: {
-            ugen: "flock.ugen.mouse.cursor",
-            rate: "control",
-            mul: 293.665,
-            add: 293.665,
-            options: {
-                axis: "width",
-                target: "body"
-            }
-        },
-        mul: 0.2
-    }
-];
-
-synths.wobbly = [
-    {
-        id: "left",
-        ugen: "flock.ugen.saw",
-        freq: 0,
-        mul: 0.05,
-        phase: {
-           id: "mod",
-           ugen: "flock.ugen.sinOsc",
-           freq: 34.0,
-           mul: {
-               ugen: "flock.ugen.sinOsc",
-               freq: 1/20,
-               mul: flock.PI
-           },
-           add: flock.PI
-        }
-    },
-    {
-        id: "right",
-        ugen: "flock.ugen.sinOsc",
-        freq: 0,
-        mul: 0.2,
-        phase: {
-           id: "mod",
-           ugen: "flock.ugen.sinOsc",
-           freq: 3,
-           mul: {
-               ugen: "flock.ugen.sinOsc",
-               freq: 1/3,
-               mul: flock.PI
-           },
-           add: flock.PI
         }
     }
 ];

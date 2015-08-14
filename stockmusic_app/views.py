@@ -20,22 +20,18 @@ class Yahoo(View):
     def get(self, request):
 
         request_dict = dict(request.GET)
-
         fixed_dict = {k: v[0] for k, v in request_dict.items()}
 
         duration = fixed_dict["duration"]
-
         lookback = fixed_dict["lookback"]
-
         instrument = fixed_dict["instrument"]
+        up_scale = fixed_dict["up_scale"]
+        down_scale = fixed_dict["down_scale"]
 
         start_date = datetime.datetime.strptime(fixed_dict["start_date"], "%Y-%m-%d")
-
         end_date = start_date + datetime.timedelta(days=int(duration))
-
         today = datetime.datetime.today()
-
-        if start_date >= today: # make this client side, use js form validation
+        if start_date >= today:
             fixed_dict['start_date'] = today - datetime.timedelta(days=2)
 
         if end_date > today:
@@ -56,21 +52,39 @@ class Yahoo(View):
                 quote[idx]["Adj_Close"] = float(quote[idx]["Adj_Close"])
                 quote[idx]["Volume"] = int(quote[idx]["Volume"])
             quote.reverse()
-            return JsonResponse({"quote": quote, "frequency_sequence": make_notes_v2(quote, int(lookback)), "instrument": instrument})
+            return JsonResponse({"quote": quote, "frequency_sequence": make_notes_v2(quote, int(lookback), up_scale, down_scale), "instrument": instrument, "up_scale": up_scale, "down_scale": down_scale})
         except:
             return JsonResponse({"error": "Invalid ticker and/or date range."})
 
 
-def make_notes_v2(quotes, lookback):
-    major = [261.626, 329.628, 391.995, 493.883]
-    minor = [261.626, 311.127, 369.994, 440.000]
+def make_notes_v2(quotes, lookback, up_scale, down_scale):
+    major = [261.626, 329.628, 391.995, 493.883]  ## 1, 3, 5, 7
+    dominant = [261.626, 329.628, 391.995, 493.883]  ## 1, 3, 5, b7
+    minor = [261.626, 311.127, 391.995, 415.305]  ## 1, b3, 5, b6
+    diminished = [261.626, 311.127, 369.994, 415.305]  ## 1, b3, b5, bb7
+    ascending = None
+    descending = None
+
     frequency_sequence = []
     octave = 1
     scaleCounter = 0
     start = 0
 
-    for index in range(len(quotes)):
+    if up_scale == "major":
+        ascending = major
+    elif up_scale == "dominant":
+        ascending = dominant
+    else:
+        ascending = "major"
 
+    if down_scale == "minor":
+        descending = minor
+    elif down_scale == "diminished":
+        descending = diminished
+    else:
+        descending = "minor"
+
+    for index in range(len(quotes)):
         mood_pitch_price_harmony = dict()
         mood = "normal"
 
@@ -99,16 +113,13 @@ def make_notes_v2(quotes, lookback):
                         octave = .5
                     else:
                         octave = int(octave+1)
-                    print("_____________", octave, "sc", scaleCounter)
                 scaleCounter += 1
                 scaleCounter = abs(scaleCounter)
-                print("absolute scale counter", scaleCounter)
-                mood_pitch_price_harmony["pitch"] = octave * major[scaleCounter % len(major)]
-                print("****************", major[scaleCounter % len(major)])
+                mood_pitch_price_harmony["pitch"] = octave * ascending[scaleCounter % len(ascending)]
                 if scaleCounter == 3:
                     mood_pitch_price_harmony["harmony"] = mood_pitch_price_harmony["pitch"] * (6/5)
                 else:
-                    mood_pitch_price_harmony["harmony"] = octave * major[scaleCounter+1 % len(major)]
+                    mood_pitch_price_harmony["harmony"] = octave * ascending[scaleCounter+1 % len(ascending)]
 
             else:
                 if scaleCounter == 0:
@@ -120,14 +131,13 @@ def make_notes_v2(quotes, lookback):
 
                 scaleCounter -= 1
                 scaleCounter = abs(scaleCounter)
-                mood_pitch_price_harmony["pitch"] = octave * minor[scaleCounter % len(minor)]
-                mood_pitch_price_harmony["harmony"] = mood_pitch_price_harmony["pitch"] * (16/15)
-        print("octave", octave)
+                mood_pitch_price_harmony["pitch"] = octave * descending[scaleCounter % len(descending)]
+                if scaleCounter == 3:
+                    mood_pitch_price_harmony["harmony"] = mood_pitch_price_harmony["pitch"] * (5/4) ## third above root
+                else:
+                    mood_pitch_price_harmony["harmony"] = octave * descending[scaleCounter+1 % len(descending)]
+
         mood_pitch_price_harmony["price"] = quotes[index]["Adj_Close"]
         frequency_sequence.append(mood_pitch_price_harmony)
-        print(mood_pitch_price_harmony)
 
     return frequency_sequence
-
-# bookmarkable? maybe not worth it.
-
