@@ -65,6 +65,23 @@ body {
     color: blue;
 }
 
+.innur {
+    min-height: 310px;
+    position: relative;
+}
+
 #lineBackground {
     min-height: 310px;
+    position: absolute;
+}
+
+#ticker {
+    position: absolute;
+    opacity: 0.1;
+    font-size: 12em;
+    line-height: 310px;
+    top: 50%;
+    left: 50%;
+    transform: translateX(-50%) translateY(-50%);
+    z-index: -1
 }

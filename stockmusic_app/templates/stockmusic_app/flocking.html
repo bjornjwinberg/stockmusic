@@ -52,7 +52,6 @@
         </div>
       </div>
 
-
 <div id="form_and_chart">
 
     <div id="hiddenThingy" hidden>
@@ -60,6 +59,8 @@
         <button type="button" class="btn btn-primary" id="stop_worker" data-toggle="tooltip" title="Lets you hover through the chart.">INTERACTIVE</button>
 
         <div id="funButtons" hidden>
+
+        <button type="button" class="btn btn-default" id="start_worker" data-toggle="tooltip" title="Exits interactive mode">EXIT</button>
 
         <button type="button" class="btn btn-success" id="start" data-toggle="tooltip" title="This button starts your theremin: vertical for volume, horizontal for pitch.">start theremin</button>
         <button type="button" class="btn btn-danger" id="shut_up" data-toggle="tooltip" title="This button stops your theremin.">stop theremin</button>
@@ -73,7 +74,12 @@
                 <div class = "chartFeedback" id="date_display"><h4>DATE</h4><h1></h1></div>
                 <div class = "chartFeedback" id="volume_display"><h4>VOLUME</h4><h1></h1></div>
             </div>
-            <div class = "innur" id="lineBackground"></div>​
+
+            <div class = "innur">
+                <div id="ticker"></div>
+                <div id="lineBackground"></div>
+            </div>​
+
         </div>
     </div>
 
@@ -81,7 +87,7 @@
         <form class="form-horizontal" role="form" id="stock_form" method="GET" action="/stockmusic_app/prices">
 
           <div class="form-group">
-            <label class="control-label col-sm-2" for="pwd" data-toggle="tooltip" title="Please enter a valid ticker. Examples: aapl, spy, brk-a, fb.">Company:</label>
+            <label class="control-label col-sm-2" for="pwd" data-toggle="tooltip" title="Please enter a valid ticker. Examples: aapl, spy, brk-a, ge. (This is currently a dropdown of companies that have data over the past ten years, with the exception of Facebook, which is inluded to provide an example of what happens when an error is returned from the server.)">Company:</label>
             <div class="col-sm-10">
                 <select name="company" autofocus class="form-control">
                     <option value="aapl">Apple</option>
@@ -105,7 +111,7 @@
 
 
           <div class="form-group">
-            <label class="control-label col-sm-2" for="pwd" data-toggle="tooltip" title="Enter a valid start date. Please note that if you enter a date before the company was publicly listed, or if Yahoo Finance's API just doesn't have the data, an error message will display.">Start Date:</label>
+            <label class="control-label col-sm-2" for="pwd" data-toggle="tooltip" title="Enter a valid start date. Please note that if you select a date before the company was publicly listed, or if Yahoo Finance's API just doesn't have the data, an error message will display.">Start Date:</label>
             <div class="col-sm-10">
               <input type="date" name="start_date" required value="2005-01-01" min="2005-01-01" max="2015-08-13" class="form-control">
             </div>
@@ -127,45 +133,47 @@
           </div>
 
           <div class="form-group">
-            <label class="control-label col-sm-2" for="pwd" data-toggle="tooltip" title="This is the number of trailing days used to calculate the current moving average. Higher values are generally better for tracking long-term trends.">Lookback:</label>
+            <label class="control-label col-sm-2" for="pwd" data-toggle="tooltip" title="This is the number of trailing days used to calculate the current moving average, which determines the background of the main chart. Higher values are generally better for tracking long-term trends.">Look-back:</label>
             <div class="col-sm-10">
               <input type="number" name="lookback" min="2" max="365" value="10" class="form-control">
             </div>
           </div>
 
           <div class="form-group">
-            <label class="control-label col-sm-2" for="pwd" data-toggle="tooltip" title="Positive percentage change necessary from initial price to trigger an alert.">Positive Threshold:</label>
+            <label class="control-label col-sm-2" for="pwd" data-toggle="tooltip" title="Positive percentage change necessary from initial price to trigger a positive-sounding alert.">Positive Threshold:</label>
             <div class="col-sm-10">
               <input type="number" name="positive-threshold" min="1" max="100" value="100" class="form-control">
             </div>
           </div>
 
           <div class="form-group">
-            <label class="control-label col-sm-2" for="pwd" data-toggle="tooltip" title="Negative percentage change necessary from initial price to trigger an alert."> Negative Threshold:</label>
+            <label class="control-label col-sm-2" for="pwd" data-toggle="tooltip" title="Negative percentage change necessary from initial price to trigger a negative-sounding alert."> Negative Threshold:</label>
             <div class="col-sm-10">
               <input type="number" name="negative-threshold" min="-100" max="-1" value="-100" class="form-control">
             </div>
           </div>
 
           <div class="form-group">
-            <label class="control-label col-sm-2" for="pwd" data-toggle="tooltip" title="Higher values mean a slower song and chart.">Tempo:</label>
+            <label class="control-label col-sm-2" for="pwd" data-toggle="tooltip" title="Higher values mean a slower song and chart during playback.">Tempo:</label>
             <div class="col-sm-10">
                 <select name="tempo" class="form-control">
                     <option value="50">50</option>
                     <option value="100">100</option>
                     <option value="150">150</option>
-                    <option value="200" selected="selected">200</option>
+                    <option value="250" selected="selected">250</option>
                     <option value="400">400</option>
+                    <option value="600">600</option>
+                    <option value="1000">1000</option>
                 </select>
             </div>
           </div>
 
           <div class="form-group">
-            <label class="control-label col-sm-2" for="pwd" data-toggle="tooltip" title="The character of the synthesizer. Castlevania is a good all-around choice.">Instrument:</label>
+            <label class="control-label col-sm-2" for="pwd" data-toggle="tooltip" title='Character and tone of the synthesizer. "Rotator" by default.'>Instrument:</label>
             <div class="col-sm-10">
                 <select name="instrument" class="form-control">
                     <option value="nintendo">Nintendo</option>
-                    <option value="wobbly">Wobbly</option>
+                    <option value="wobbly">Saw & PI</option>
                     <option value="rotator" selected="selected">Rotator</option>
                     <option value="sine">Sine</option>
                 </select>
@@ -183,7 +191,7 @@
           </div>
 
           <div class="form-group">
-            <label class="control-label col-sm-2" for="pwd" data-toggle="tooltip" title="Descending note frequencies. Please note that the current algorithm uses a four note scale: root, third, fifth, and seventh.">Descending:</label>
+            <label class="control-label col-sm-2" for="pwd" data-toggle="tooltip" title="Descending note frequencies. Please note that the current algorithm uses a four-note scale: root, third, fifth, and seventh.">Descending:</label>
             <div class="col-sm-10">
                 <select name="down_scale" class="form-control">
                     <option value="minor">Minor</option>
@@ -193,10 +201,10 @@
           </div>
 
           <div class="form-group">
-            <label class="control-label col-sm-2" for="pwd" data-toggle="tooltip" title="Option to turn charting synthesizer on or off, while leaving alarms on.">Alarm Mode:</label>
+            <label class="control-label col-sm-2" for="pwd" data-toggle="tooltip" title="Option to turn charting synthesizer off, while leaving alarm(s) on.">Alarm Mode:</label>
             <div class="col-sm-10">
                 <select name="alarm_mode" class="form-control">
-                    <option value="synthOn">Alarm and Synth</option>
+                    <option value="synthOn" selected="selected">Alarm and Synth</option>
                     <option value="synthOff">Alarm Only</option>
                 </select>
             </div>

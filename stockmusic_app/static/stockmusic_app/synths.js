@@ -5,13 +5,13 @@ synths.sine = [
         id: "left",
         ugen: "flock.ugen.sinOsc",
         freq: 261.626,
-        mul: 0.2
+        mul: 0.35
     },
     {
         id: "right",
         ugen: "flock.ugen.sinOsc",
         freq: 261.626,
-        mul: 0.2
+        mul: 0.35
     }
 ];
 
@@ -20,7 +20,7 @@ synths.wobbly = [
         id: "left",
         ugen: "flock.ugen.saw",
         freq: 0,
-        mul: 0.05,
+        mul: 0.1,
         phase: {
            id: "mod",
            ugen: "flock.ugen.sinOsc",
@@ -57,13 +57,13 @@ synths.nintendo = [
         id: "left",
         ugen: "flock.ugen.tri",
         freq: 0,
-        mul: 0.3
+        mul: 0.35
     },
     {
         id: "right",
         ugen: "flock.ugen.tri",
         freq: 0,
-        mul: 0.3
+        mul: 0.35
     }
 ];
 
@@ -139,7 +139,7 @@ synths.user = [
                 axis: "height",
                 target: "body"
             },
-            mul: 0.2
+            mul: 0.3
         }
     }
 ];
